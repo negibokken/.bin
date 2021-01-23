@@ -1,0 +1,109 @@
+#!/bin/bash
+PROGNAME=$(basename $0)
+VERSION="1.0"
+usage_exit() {
+  cat << EOS
+Usage: $PROGNAME [OPTION] <filename>
+    Options:
+      -h, --help     show help
+          --version  show version
+EXAMPLE:
+  $PROGNAME script-name
+EOS
+  exit 1
+}
+
+flag=0
+for OPT in "$@"
+do
+    case $OPT in
+        -h | --help)
+            usage_exit; exit 1;;
+        --version)
+            echo $VERSION; exit 1;;
+        -l )
+            flag=1
+            shift 1
+            ;;
+        -- | -)
+            shift 1
+            param+=( "$@" )
+            break
+            ;;
+        -*)
+            echo "$PROGNAME: illegal option -- '$(echo $1 | sed 's/^-*//')'" 1>&2
+            exit 1
+            ;;
+        *)
+            if [[ ! -z "$1" ]] && [[ ! "$1" =~ ^-+ ]]; then
+                param+=( "$1" )
+                shift 1
+            fi
+            ;;
+    esac
+done
+
+if [ ${#param[@]} != 1 ]; then
+  usage_exit
+fi
+
+FILENAME=${param[0]}
+
+if [ -e $FILENAME ]; then
+  echo "file exist"
+fi
+
+cat << 'EOSS' > $FILENAME
+#!/bin/bash
+PROGNAME=$(basename $0)
+VERSION="1.0"
+usage_exit() {
+  cat << EOS
+Usage: $PROGNAME [OPTION] <arg1>
+    Options:
+      -h, --help     show help
+          --version  show version
+EXAMPLE:
+  $PROGNAME arg1
+EOS
+  exit 1
+}
+
+flag=0
+for OPT in "$@"
+do
+    case $OPT in
+        -h | --help)
+            usage_exit; exit 1;;
+        --version)
+            echo $VERSION; exit 1;;
+        -l )
+            flag=1
+            shift 1
+            ;;
+        -- | -)
+            shift 1
+            param+=( "$@" )
+            break
+            ;;
+        -*)
+            echo "$PROGNAME: illegal option -- '$(echo $1 | sed 's/^-*//')'" 1>&2
+            exit 1
+            ;;
+        *)
+            if [[ ! -z "$1" ]] && [[ ! "$1" =~ ^-+ ]]; then
+                param+=( "$1" )
+                shift 1
+            fi
+            ;;
+    esac
+done
+
+if [ ${#param[@]} != 1 ]; then
+  usage_exit
+fi
+
+DIRNAME=${param[0]}
+EOSS
+
+chmod +x $FILENAME
